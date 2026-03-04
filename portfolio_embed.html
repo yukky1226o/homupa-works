@@ -74,9 +74,7 @@ body{
   overflow-x:auto;
   -webkit-overflow-scrolling:touch;
   scrollbar-width:none;
-  min-width:0;
-  flex:1;
-  padding-bottom:2px;
+  min-width:0;flex:1;padding-bottom:2px;
 }
 .filter-tags::-webkit-scrollbar{display:none;}
 .tag{
@@ -121,8 +119,7 @@ body{
 }
 .card:hover .view-label{opacity:1;transform:translateX(-50%) translateY(0);}
 .cs-thumb{
-  width:100%;height:100%;
-  background:#888;
+  width:100%;height:100%;background:#888;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
   overflow:hidden;position:absolute;inset:0;
 }
@@ -173,8 +170,7 @@ body{
   display:inline-flex;align-items:center;gap:0.5rem;
   background:transparent;border:1px solid var(--border);
   color:var(--text-secondary);font-family:inherit;font-size:0.88rem;font-weight:500;
-  padding:0.75rem 2.5rem;border-radius:980px;cursor:pointer;
-  transition:all 0.2s;
+  padding:0.75rem 2.5rem;border-radius:980px;cursor:pointer;transition:all 0.2s;
 }
 .load-more-btn:hover{border-color:var(--border-hover);color:var(--text);background:var(--surface2);}
 ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px;}
@@ -188,7 +184,7 @@ body{
   .filter-label{font-size:0.6rem;min-width:42px;}
   .tag{font-size:0.72rem;padding:0.22rem 0.6rem;}
   .grid-section{padding:1.25rem 1rem 3rem;}
-  .grid{grid-template-columns:repeat(2,1fr);border-radius:var(--radius-sm);}
+  .grid{grid-template-columns:1fr;border-radius:var(--radius-sm);}
   .modal-backdrop{padding:0.5rem;}
   .modal{border-radius:16px;}
   .modal-content{padding:1.25rem 1.25rem 2rem;}
@@ -199,7 +195,6 @@ body{
 </style>
 </head>
 <body>
-
 <div class="controls" id="controls">
   <div class="search-row">
     <div class="search-box">
@@ -223,7 +218,6 @@ body{
     </div>
   </div>
 </div>
-
 <section class="grid-section">
   <div class="grid-meta">
     <div class="result-count" id="resultCount"><strong>0</strong> 件の実績</div>
@@ -241,7 +235,6 @@ body{
     </button>
   </div>
 </section>
-
 <div class="modal-backdrop" id="modal" onclick="closeModal(event)">
   <div class="modal">
     <div class="modal-thumb" id="modalThumb">
@@ -264,7 +257,6 @@ body{
     </div>
   </div>
 </div>
-
 <script>
 const STORAGE_KEY = 'homupaWorks';
 const PAGE_SIZE = 6;
