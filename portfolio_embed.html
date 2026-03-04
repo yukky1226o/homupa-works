@@ -168,4 +168,254 @@ body{
 .tech-chip{background:var(--surface3);border:1px solid var(--border);padding:0.3rem 0.8rem;border-radius:980px;font-size:0.78rem;color:var(--text-secondary);}
 .modal-link{display:inline-flex;align-items:center;gap:0.45rem;background:var(--grad);color:#fff;padding:0.75rem 1.6rem;border-radius:980px;text-decoration:none;font-weight:600;font-size:0.88rem;transition:opacity 0.18s;}
 .modal-link:hover{opacity:0.85;}
-.load-more-wrap{text-align:center;margin-top:2
+.load-more-wrap{text-align:center;margin-top:2rem;}
+.load-more-btn{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  background:transparent;border:1px solid var(--border);
+  color:var(--text-secondary);font-family:inherit;font-size:0.88rem;font-weight:500;
+  padding:0.75rem 2.5rem;border-radius:980px;cursor:pointer;
+  transition:all 0.2s;
+}
+.load-more-btn:hover{border-color:var(--border-hover);color:var(--text);background:var(--surface2);}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px;}
+@media(max-width:1024px){
+  .grid{grid-template-columns:repeat(3,1fr);}
+}
+@media(max-width:640px){
+  .controls{padding:0.6rem 1rem;}
+  .filter-row{flex-direction:column;gap:0.55rem;}
+  .filter-group{flex-direction:row;align-items:center;gap:0.5rem;}
+  .filter-label{font-size:0.6rem;min-width:42px;}
+  .tag{font-size:0.72rem;padding:0.22rem 0.6rem;}
+  .grid-section{padding:1.25rem 1rem 3rem;}
+  .grid{grid-template-columns:repeat(2,1fr);border-radius:var(--radius-sm);}
+  .modal-backdrop{padding:0.5rem;}
+  .modal{border-radius:16px;}
+  .modal-content{padding:1.25rem 1.25rem 2rem;}
+  .modal-title{font-size:1.4rem;}
+  .modal-desc{font-size:0.85rem;}
+  .modal-content .modal-link{width:100%;justify-content:center;}
+}
+</style>
+</head>
+<body>
+
+<div class="controls" id="controls">
+  <div class="search-row">
+    <div class="search-box">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="キーワードで検索（例：飲食、シンプル、LP）">
+    </div>
+    <button class="clear-btn" onclick="clearAll()">クリア</button>
+  </div>
+  <div class="filter-row">
+    <div class="filter-group">
+      <div class="filter-label">業種</div>
+      <div class="filter-tags" id="industryFilters"></div>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">雰囲気</div>
+      <div class="filter-tags" id="moodFilters"></div>
+    </div>
+    <div class="filter-group">
+      <div class="filter-label">カテゴリ</div>
+      <div class="filter-tags" id="categoryFilters"></div>
+    </div>
+  </div>
+</div>
+
+<section class="grid-section">
+  <div class="grid-meta">
+    <div class="result-count" id="resultCount"><strong>0</strong> 件の実績</div>
+  </div>
+  <div class="grid" id="grid">
+    <div class="no-results" id="noResults">
+      <h3>No Results</h3>
+      <p>条件に一致する実績が見つかりませんでした</p>
+    </div>
+  </div>
+  <div class="load-more-wrap" id="loadMoreWrap" style="display:none;">
+    <button class="load-more-btn" id="loadMoreBtn" onclick="loadMore()">
+      もっと見る
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+  </div>
+</section>
+
+<div class="modal-backdrop" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-thumb" id="modalThumb">
+      <button class="modal-close" onclick="closeModalDirect()">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-content">
+      <div class="modal-chips" id="modalChips"></div>
+      <h2 class="modal-title" id="modalTitle"></h2>
+      <div class="modal-client" id="modalClient"></div>
+      <p class="modal-desc" id="modalDesc"></p>
+      <div class="modal-specs" id="modalSpecs"></div>
+      <div class="modal-tech-label">使用技術・ツール</div>
+      <div class="tech-list" id="modalTechs"></div>
+      <a href="#" class="modal-link" id="modalLink" target="_blank">
+        サイトを見る
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M7 17 17 7M7 7h10v10"/></svg>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'homupaWorks';
+const PAGE_SIZE = 6;
+const fallback = [
+  {id:1,title:"Sakura Blossom Cafe",client:"株式会社サクラブロッサム",year:2024,industry:"飲食",mood:"ナチュラル",category:"コーポレート",bg:"#555",image:null,desc:"都内4店舗のカフェチェーンブランドサイト。スマホ対応強化でモバイル流入+45%を達成。",techs:["WordPress","WooCommerce","GSAP"],url:"#",specs:{制作期間:"6週間",ページ数:"12P",対応:"レスポンシブ"}},
+  {id:2,title:"NEXUS Architecture",client:"NEXUS一級建築士事務所",year:2024,industry:"建築・不動産",mood:"ラグジュアリー",category:"コーポレート",bg:"#555",image:null,desc:"高級住宅・商業施設を手がける建築事務所。問い合わせ件数が改修後2.3倍に増加。",techs:["Next.js","Framer Motion","Three.js"],url:"#",specs:{制作期間:"10週間",ページ数:"8P",対応:"レスポンシブ"}}
+];
+let works = [];
+let displayCount = PAGE_SIZE;
+const active = {industry:new Set(), mood:new Set(), category:new Set()};
+let q = '';
+function initWithData(data) {
+  works = data.length ? data : (JSON.parse(localStorage.getItem(STORAGE_KEY)||'null') || fallback);
+  buildFilters();
+  resetAndRender();
+}
+window.addEventListener('worksLoaded', e => initWithData(e.detail));
+window.addEventListener('firebaseFailed', () => initWithData(JSON.parse(localStorage.getItem(STORAGE_KEY)||'null') || fallback));
+setTimeout(() => { if (!works.length) initWithData(JSON.parse(localStorage.getItem(STORAGE_KEY)||'null') || fallback); }, 3000);
+function buildFilters() {
+  const map = {industry:'industryFilters', mood:'moodFilters', category:'categoryFilters'};
+  const defs = {
+    industry:[...new Set(works.map(w=>w.industry).filter(Boolean))],
+    mood:[...new Set(works.map(w=>w.mood).filter(Boolean))],
+    category:[...new Set(works.map(w=>w.category).filter(Boolean))]
+  };
+  for (const [key, id] of Object.entries(map)) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    el.innerHTML = '';
+    defs[key].forEach(val => {
+      const btn = document.createElement('button');
+      btn.className = 'tag';
+      btn.textContent = val;
+      btn.onclick = () => {
+        active[key].has(val) ? active[key].delete(val) : active[key].add(val);
+        btn.classList.toggle('active');
+        resetAndRender();
+      };
+      el.appendChild(btn);
+    });
+  }
+}
+const searchInput = document.getElementById('searchInput');
+if (searchInput) searchInput.addEventListener('input', e => { q = e.target.value; resetAndRender(); });
+function clearAll() {
+  for (const k in active) active[k].clear();
+  document.querySelectorAll('.tag.active').forEach(t => t.classList.remove('active'));
+  if (searchInput) searchInput.value = '';
+  q = '';
+  resetAndRender();
+}
+function getFiltered() {
+  return works.filter(w => {
+    const lq = q.toLowerCase();
+    if (lq && ![w.title,w.client,w.desc,w.industry,w.mood,w.category].some(s=>(s||'').toLowerCase().includes(lq))) return false;
+    if (active.industry.size && !active.industry.has(w.industry)) return false;
+    if (active.mood.size && !active.mood.has(w.mood)) return false;
+    if (active.category.size && !active.category.has(w.category)) return false;
+    return true;
+  });
+}
+function csThumbHTML() {
+  return `<div class="cs-thumb"><div class="cs-line"></div><div class="cs-label">Coming Soon</div><div class="cs-line"></div></div>`;
+}
+function resetAndRender() {
+  displayCount = PAGE_SIZE;
+  renderGrid();
+}
+function loadMore() {
+  displayCount += PAGE_SIZE;
+  renderGrid();
+}
+function renderGrid() {
+  if (!works.length) return;
+  const grid = document.getElementById('grid');
+  grid.querySelectorAll('.card').forEach(c => c.remove());
+  const list = getFiltered();
+  const rc = document.getElementById('resultCount');
+  if (rc) rc.innerHTML = `<strong>${list.length}</strong> 件の実績`;
+  document.getElementById('noResults').style.display = list.length ? 'none' : 'block';
+  const visible = list.slice(0, displayCount);
+  visible.forEach(w => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    const thumbContent = w.image
+      ? `<img src="${w.image}" alt="${w.title}" style="width:100%;height:100%;object-fit:cover;display:block;">`
+      : csThumbHTML();
+    card.innerHTML = `
+      <div class="card-thumb">
+        <div class="card-thumb-inner">${thumbContent}</div>
+        <span class="view-label">詳細を見る</span>
+      </div>
+      <div class="card-body">
+        <div class="card-chips">
+          <span class="chip primary">${w.industry||''}</span>
+          <span class="chip">${w.mood||''}</span>
+          <span class="chip">${w.category||''}</span>
+        </div>
+        <div class="card-title">${w.title}</div>
+        <div class="card-client">${w.client}</div>
+        <div class="card-desc">${w.desc}</div>
+        <div class="card-footer">
+          <span class="card-year">${w.year}</span>
+          <span class="card-cta">詳細を見る →</span>
+        </div>
+      </div>`;
+    card.onclick = () => openModal(w);
+    grid.appendChild(card);
+  });
+  const wrap = document.getElementById('loadMoreWrap');
+  const btn = document.getElementById('loadMoreBtn');
+  const remaining = list.length - displayCount;
+  if (remaining > 0) {
+    wrap.style.display = 'block';
+    btn.innerHTML = `もっと見る（残り${remaining}件）<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>`;
+    btn.onclick = loadMore;
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+function openModal(w) {
+  const thumb = document.getElementById('modalThumb');
+  thumb.style.background = '#888';
+  thumb.querySelectorAll('img, .cs-modal').forEach(el => el.remove());
+  if (w.image) {
+    const img = document.createElement('img');
+    img.src = w.image; img.alt = w.title;
+    thumb.appendChild(img);
+  } else {
+    const cs = document.createElement('div');
+    cs.className = 'cs-modal';
+    cs.innerHTML = `<div class="cs-line"></div><div class="cs-label">Coming Soon</div><div class="cs-line"></div>`;
+    thumb.appendChild(cs);
+  }
+  document.getElementById('modalChips').innerHTML =
+    `<span class="chip primary">${w.industry||''}</span><span class="chip">${w.mood||''}</span><span class="chip">${w.category||''}</span>`;
+  document.getElementById('modalTitle').textContent = w.title;
+  document.getElementById('modalClient').textContent = 'クライアント：' + w.client;
+  document.getElementById('modalDesc').textContent = w.desc;
+  document.getElementById('modalLink').href = w.url || '#';
+  document.getElementById('modalSpecs').innerHTML = Object.entries(w.specs||{}).map(([k,v]) =>
+    `<div class="spec-item"><div class="spec-label">${k}</div><div class="spec-value">${v}</div></div>`).join('');
+  document.getElementById('modalTechs').innerHTML = (w.techs||[]).map(t =>
+    `<span class="tech-chip">${t}</span>`).join('');
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(e) { if (e.target === document.getElementById('modal')) closeModalDirect(); }
+function closeModalDirect() { document.getElementById('modal').classList.remove('open'); document.body.style.overflow = ''; }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModalDirect(); });
+</script>
+</body>
+</html>
